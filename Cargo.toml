@@ -1,10 +1,20 @@
 [package]
 name = "rand-bot"
+author = ["jokintaro"]
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
-tokio = {version = "0.2", features = ["macros"]}
-serenity = {default-features = false, features = ["client", "gateway", "model", "rustls_backend"], version = "0.9.0-rc.1"}
+serenity = { version = "0.12", default-features = false, features = [
+    "builder",
+    "chrono",
+    "client",
+    "framework",
+    "gateway",
+    "http",
+    "model",
+    "standard_framework",
+    "utils",
+    "rustls_backend",
+]}
+tokio = { version = "1.21.2", features = ["macros", "rt-multi-thread"] }

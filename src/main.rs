@@ -1,46 +1,42 @@
 use std::env;
 
-use serenity::{
-    async_trait,
-    model::{channel::Message, gateway::Ready},
-    prelude::*,
-};
-
-const HELP_MESSAGE: &str = "
-test
-<#1232155628349427722> channel
-";
-
-const HELP_COMMAND: &str = "!help";
+use serenity::async_trait;
+use serenity::model::channel::Message;
+use serenity::prelude::*;
+//use serenity::client::bridge::gateway::GatewayIntents;
+use serenity::model::gateway::GatewayIntents;
 
 struct Handler;
 
 #[async_trait]
 impl EventHandler for Handler {
     async fn message(&self, ctx: Context, msg: Message) {
-        if msg.content == HELP_COMMAND {
-            if let Err(why) = msg.channel_id.say(&ctx.http, HELP_MESSAGE).await {
-                println!("Error sending message: {:?}", why);
+        if msg.content == "!ping" {
+            if let Err(why) = msg.channel_id.say(&ctx.http, "Pong!").await {
+                println!("Error sending message: {why:?}");
             }
         }
-    }
-
-    async fn ready(&self, _: Context, ready: Ready) {
-        println!("{} is connected!", ready.user.name);
     }
 }
 
 #[tokio::main]
 async fn main() {
-    let token = env::var("DISCORD_TOKEN")
-        .expect("Expected a token in the environment");
+    // Login with a bot token from the environment
+    let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
 
-    let mut client = Client::new(&token)
+    // Set gateway intents, which decides what events the bot will be notified about
+    let intents = GatewayIntents::GUILD_MESSAGES
+        | GatewayIntents::DIRECT_MESSAGES;
+
+    // Create a new instance of the Client, logging in as a bot.
+    let mut client = Client::builder(&token)
         .event_handler(Handler)
+        .intents(intents)
         .await
         .expect("Err creating client");
 
+    // Start listening for events by starting a single shard
     if let Err(why) = client.start().await {
-        println!("CLient error: {:?}", why);
+        println!("Client error: {:?}", why);
     }
 }
