@@ -2,41 +2,47 @@ use std::env;
 
 use serenity::async_trait;
 use serenity::model::channel::Message;
+use serenity::model::gateway::Ready;
 use serenity::prelude::*;
-//use serenity::client::bridge::gateway::GatewayIntents;
-use serenity::model::gateway::GatewayIntents;
 
 struct Handler;
+
+const CONTENT_SCHOOL: &str = "!school";
+
+const MSG_SCHOOL: &str = "明日は大学に行く！";
 
 #[async_trait]
 impl EventHandler for Handler {
     async fn message(&self, ctx: Context, msg: Message) {
-        if msg.content == "!ping" {
-            if let Err(why) = msg.channel_id.say(&ctx.http, "Pong!").await {
+        if msg.content == CONTENT_SCHOOL {
+            if let Err(why) = msg.channel_id.say(&ctx.http, MSG_SCHOOL).await {
                 println!("Error sending message: {why:?}");
             }
         }
+    }
+
+    async fn ready(&self, _: Context, ready: Ready) {
+        println!("{} is connected!", ready.user.name);
     }
 }
 
 #[tokio::main]
 async fn main() {
-    // Login with a bot token from the environment
-    let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
+    let token = env::var("DISCORD_TOKEN")
+        .expect("Expected a token in the environment");
 
-    // Set gateway intents, which decides what events the bot will be notified about
-    let intents = GatewayIntents::GUILD_MESSAGES
-        | GatewayIntents::DIRECT_MESSAGES;
+    let intents = GatewayIntents::GUILDS
+        | GatewayIntents::GUILD_MESSAGES
+        | GatewayIntents::DIRECT_MESSAGES
+        | GatewayIntents::MESSAGE_CONTENT;
 
-    // Create a new instance of the Client, logging in as a bot.
-    let mut client = Client::builder(&token)
+    let mut client =
+        Client::builder(&token, intents)
         .event_handler(Handler)
-        .intents(intents)
         .await
         .expect("Err creating client");
 
-    // Start listening for events by starting a single shard
     if let Err(why) = client.start().await {
-        println!("Client error: {:?}", why);
+        println!("Client error: {why:?}");
     }
 }
