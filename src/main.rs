@@ -26,9 +26,12 @@ impl EventHandler for Handler {
     }
 }
 
+const TOKEN_NAME: &str = "DEVELOP_TOKEN";
+
 #[tokio::main]
 async fn main() {
-    let token = env::var("DISCORD_TOKEN")
+
+    let token = env::var(TOKEN_NAME)
         .expect("Expected a token in the environment");
 
     let intents = GatewayIntents::GUILDS
